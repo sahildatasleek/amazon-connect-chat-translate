@@ -40,6 +40,10 @@ const Chatroom = (props) => {
         const { AbsoluteTime, Id } = awsSdkResponse.data;
         console.log(AbsoluteTime, Id);
     }
+    const handleChange = (event) => {
+        setSelectedLanguage(event.target.value); // Update the state
+        userActionRef.current = true; // Mark this as a user action
+      };
 
     useEffect(() => {
 

@@ -6,7 +6,7 @@ import Chatroom from './chatroom';
 import translateText from './translate'
 import detectText from './detectText'
 import { addChat, setLanguageTranslate, clearChat, useGlobalState, setCurrentContactId } from '../store/state';
-
+import Deposition from './Deposition';
 Amplify.configure(awsconfig);
 
 const Ccp = () => {
