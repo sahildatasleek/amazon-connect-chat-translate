@@ -209,15 +209,18 @@ const Ccp = () => {
 
     return (
         <main>
-          <Grid columns='equal' stackable padded>
-          <Grid.Row>
-            {/* CCP window will load here */}
-            <div id="ccp-container"></div>
-            {/* Translate window will laod here. We pass the agent state to be able to use this to push messages to CCP */}
-            <div id="chatroom" ><Chatroom session={agentChatSessionState}/> </div> 
-            </Grid.Row>
-          </Grid>
-        </main>
+        <Grid columns='equal' stackable padded>
+        <Grid.Row>
+          {/* CCP window will load here */}
+          <div id="ccp-container"></div>
+          {/* Translate window will laod here. We pass the agent state to be able to use this to push messages to CCP */}
+          <div id="chatroom" ><Chatroom session={agentChatSessionState}/> </div> 
+<div id="Depositioncontainer">
+   <Deposition />
+  </div>
+          </Grid.Row>
+        </Grid>
+      </main>
     );
 };
 

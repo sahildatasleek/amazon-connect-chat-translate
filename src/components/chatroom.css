@@ -130,3 +130,101 @@ p {
   background: #4A4A4A;
   color: #FFF;
 }
+
+.DepositionContainer{
+  height: 500px;
+  /* padding-top: 15px; */
+  /* padding-left: 15px; */
+  display: flex;
+  border: 2px solid grey;
+  gap: 1rem;
+  width: 420px;
+  background: white;
+  flex-direction: column;
+}
+.Recordingcontrol{
+background-color: #236d0b;
+color: #fff;
+margin: 0;
+height: 40px;
+font-size: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.inactive{
+background-color: #c81212;
+color: #fff;
+margin: 0;
+height: 40px;
+font-size: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+
+}
+.controlsbutton{
+display: flex;
+flex-direction: row;
+gap: 8px;
+height: 50%;
+justify-content: space-evenly;
+align-items: center;
+}
+.startButton{
+background-color: #022968;
+color: #fff;
+border: none;
+padding: 7px;
+font-size: large;
+border-radius:5px;
+width:6rem;
+cursor: pointer;
+}
+.pauseButton{
+background-color: #022968;
+font-size: large;
+color: #fff;
+width:6rem;
+border-radius:5px;
+border: none;
+padding: 7px;
+cursor: pointer;
+
+}
+.Depositionheader{
+background-color: #dd7016;
+color: #fff;
+margin: 0;
+height: 40px;
+font-size: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.DepositionCode{
+   display: flex;
+  flex-direction: column;
+  border: 1px solid #c7c3c3;
+  /* grid-gap: 8px; */
+  /* gap: 8px; */
+  overflow: auto;
+  height: 80%;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.DepositionCode button{
+border:none;
+font-size:1rem; 
+padding: 7px;
+background: none;
+}
+.DepositionCode button:hover{
+background-color: #4a4a4a;
+color: #fff;
+cursor: pointer;
+}
+#Depositioncontainer{
+margin-left:13px;
+}
