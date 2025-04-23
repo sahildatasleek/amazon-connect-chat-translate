@@ -27,7 +27,7 @@ function App({ signOut, user }) {
 
   return (
     <div className="App">
-      {isConfigured && <Ccp user={user} signOut={signOut} />}
+      {<Ccp user={user} signOut={signOut} />}
     </div>
   );
 }
