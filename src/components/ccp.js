@@ -104,6 +104,7 @@ const Ccp = () => {
                 // This is invoked when CCP is ringing
                 contact.onConnecting(() => {
                     console.log("CDEBUG ===> onConnecting() >> contactId: ", contact.contactId);
+                    localStorage.setItem('myKey', contact.contactId);
                     let contactAttributes = contact.getAttributes();
                     console.log("CDEBUG ===> contactAttributes: ", JSON.stringify(contactAttributes));
                     let contactQueue = contact.getQueue();
@@ -149,7 +150,8 @@ const Ccp = () => {
                 // This is invoked when the agent moves to ACW
                 contact.onEnded(() => {
                     console.log("CDEBUG ===> onEnded() >> contactId: ", contact.contactId);
-                    setLang('');
+                    localStorage.removeItem('myKey');
+
                 });
                 
                 // This is invoked when the agent moves out of ACW to a different state
