@@ -60,6 +60,7 @@ const Chatroom = (props) => {
 
 
     async function handleSubmit(event) {
+      setLoading(true);
         event.preventDefault();
         // if there is no text in the the chat input box, do nothing.
         if (newMessage === "") {
@@ -110,6 +111,7 @@ const Chatroom = (props) => {
             }
             return value;
         }
+        setLoading(false);
         sendMessage(session, translatedMessage);
     }
     const handleChange2 = (e) => {
