@@ -171,64 +171,64 @@ function Deposition() {
                General Question 
              </button>
              <button
-               value="Air – Exchange"
+               value="Outbound Air – Exchange"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-              Air – Exchange
+              Outbound Air – Exchange
              </button>
              <button
-               value="Air – Airline Policy or Exception"
+               value=" Outbound Air – Airline Policy or Exception"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-             Air – Airline Policy or Exception
+            Outbound  Air – Airline Policy or Exception
              </button>
              <button
-               value="Air – Schedule Change"
+               value="Outbound Air – Schedule Change"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-            Air – Schedule Change
+            Outbound Air – Schedule Change
              </button>
              <button
-               value="Fee Waiver Request"
+               value="Outbound Fee Waiver Request"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-            Fee Waiver Request
+           Outbound  Fee Waiver Request
              </button>
              <button
-               value="Follow-Up with Customer"
+               value=" Outbound Follow-Up with Customer"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-             Follow-Up with Customer
+            Outbound  Follow-Up with Customer
              </button>
              <button
-               value="Confirmation Number"
+               value="Outbound Confirmation Number"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-             Confirmation Number
+            Outbound  Confirmation Number
              </button>
              <button
-               value="Hotel Check-In Issue or Request"
+               value=" Outbound Hotel Check-In Issue or Request"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-            Hotel Check-In Issue or Request
+           Outbound  Hotel Check-In Issue or Request
              </button>
              <button
-               value="Car Pick-Up Issue"
+               value="Outbound Car Pick-Up Issue"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-            Car Pick-Up Issue
+            Outbound Car Pick-Up Issue
              </button>
              <button
-               value="Activity Ticket or Supplier Issue"
+               value="Outbound Activity Ticket or Supplier Issue"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-              Activity Ticket or Supplier Issue
+              Outbound Activity Ticket or Supplier Issue
              </button>
              <button
-               value="Flight or Airline Issue"
+               value="Outbound Flight or Airline Issue"
                onClick={(e) => DepositionHandleChnage(e)}
              >
-             Flight or Airline Issue
+            Outbound Flight or Airline Issue
              </button>
            
           </div>
