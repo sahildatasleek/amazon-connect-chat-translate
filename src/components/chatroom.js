@@ -50,11 +50,11 @@ const Chatroom = (props) => {
 //   setSelectedLanguage(event.target.value);
 //   userActionRef.current = true;
 // };
-const handleChange = (event) => {
-  const lang = event.target.value;
-  setSelectedLanguage(lang);
-  userChangedRef.current = true; // Mark manual control
-};
+// const handleChange = (event) => {
+//   const lang = event.target.value;
+//   setSelectedLanguage(lang);
+//   userChangedRef.current = true; // Mark manual control
+// };
 
     useEffect(() => {
 
@@ -242,6 +242,15 @@ useEffect(() => {
 }, [languageTranslate, currentContactId]);
 
 // When user changes the dropdown manually
+const handleChange = (event) => {
+  const lang = event.target.value;
+  setSelectedLanguage(lang);
+  userChangedRef.current = true; // Mark manual control
+};
+
+useEffect(() => {
+  userChangedRef.current = false;
+}, [currentContactId]);
 
 
 
