@@ -50,8 +50,11 @@ const Chatroom = (props) => {
 //   setSelectedLanguage(event.target.value);
 //   userActionRef.current = true;
 // };
-//! orignal handleChange
-
+const handleChange = (event) => {
+  const lang = event.target.value;
+  setSelectedLanguage(lang);
+  userChangedRef.current = true; // Mark manual control
+};
 
     useEffect(() => {
 
@@ -214,32 +217,32 @@ const Chatroom = (props) => {
 //     }
 //   }
 // }, [languageTranslate, currentContactId]);
+const detectedLangRef = useRef(null); // Track last detected lang
+const userChangedRef = useRef(false); // Track if user made a change
 
-
-const handleChange = (event) => {
-  const lang = event.target.value;
-  setSelectedLanguage(lang);
-  userActionRef.current = true;
-};
-
-// This effect handles auto-updating based on detection
+// When detected language or current contact changes
 useEffect(() => {
   const detectedLanguage = languageTranslate.find(
     (lang) => lang.contactId === currentContactId[0]
   );
 
-  if (detectedLanguage && !userActionRef.current) {
+  if (detectedLanguage) {
     const newLang = detectedLanguage.lang;
 
-    // Always set if user hasn't interacted, even if it's the same as before
-    setSelectedLanguage(newLang);
+    // If detected language has changed
+    if (detectedLangRef.current !== newLang) {
+      detectedLangRef.current = newLang;
+
+      // If user has not manually changed OR wants to follow detected
+      if (!userChangedRef.current) {
+        setSelectedLanguage(newLang);
+      }
+    }
   }
 }, [languageTranslate, currentContactId]);
 
-// Reset user override flag when switching contacts
-useEffect(() => {
-  userActionRef.current = false;
-}, [currentContactId]);
+// When user changes the dropdown manually
+
 
 
     return (
