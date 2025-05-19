@@ -158,6 +158,8 @@ const handleChange = (event) => {
       for (const element of dropdowndata) {
         valueData.push(element.category);
       }
+
+      //!orginal useEffect
       // useEffect(() => {
       //   const detectedLanguage = languageTranslate.find(
       //     (lang) => lang.contactId === currentContactId[0]
@@ -174,6 +176,20 @@ const handleChange = (event) => {
       
       //   return () => clearTimeout(timer); // Clean up the timer
       // }, [languageTranslate, currentContactId]);
+       //!orginal useEffect
+
+// useEffect(() => {
+//   const detectedLanguage = languageTranslate.find(
+//     (lang) => lang.contactId === currentContactId[0]
+//   );
+
+//   if (detectedLanguage) {
+//     if (!userActionRef.current) {
+//       setSelectedLanguage(detectedLanguage.lang);
+//     }
+//   }
+// }, [languageTranslate, currentContactId]);
+const lastDetectedLangRef = useRef(null);
 
 useEffect(() => {
   const detectedLanguage = languageTranslate.find(
@@ -181,8 +197,16 @@ useEffect(() => {
   );
 
   if (detectedLanguage) {
-    if (!userActionRef.current) {
-      setSelectedLanguage(detectedLanguage.lang);
+    const newLang = detectedLanguage.lang;
+
+    // If user has not selected manually or if detected language changed
+    if (
+      (!userActionRef.current && selectedLanguage !== newLang) ||
+      lastDetectedLangRef.current !== newLang
+    ) {
+      setSelectedLanguage(newLang);
+      lastDetectedLangRef.current = newLang;
+      userActionRef.current = false; // reset user action since we followed detected lang
     }
   }
 }, [languageTranslate, currentContactId]);
