@@ -44,9 +44,17 @@ const Chatroom = (props) => {
     //     setSelectedLanguage(event.target.value); // Update the state
     //     userActionRef.current = true; // Mark this as a user action
     //   };
+
+    //! orignal handleChange
+// const handleChange = (event) => {
+//   setSelectedLanguage(event.target.value);
+//   userActionRef.current = true;
+// };
+//! orignal handleChange
 const handleChange = (event) => {
-  setSelectedLanguage(event.target.value);
-  userActionRef.current = true;
+  const lang = event.target.value;
+  setSelectedLanguage(lang);
+  userChangedRef.current = true; // Mark manual control
 };
 
     useEffect(() => {
@@ -189,8 +197,31 @@ const handleChange = (event) => {
 //     }
 //   }
 // }, [languageTranslate, currentContactId]);
-const lastDetectedLangRef = useRef(null);
+// const lastDetectedLangRef = useRef(null);
 
+// useEffect(() => {
+//   const detectedLanguage = languageTranslate.find(
+//     (lang) => lang.contactId === currentContactId[0]
+//   );
+
+//   if (detectedLanguage) {
+//     const newLang = detectedLanguage.lang;
+
+//     // If user has not selected manually or if detected language changed
+//     if (
+//       (!userActionRef.current && selectedLanguage !== newLang) ||
+//       lastDetectedLangRef.current !== newLang
+//     ) {
+//       setSelectedLanguage(newLang);
+//       lastDetectedLangRef.current = newLang;
+//       userActionRef.current = false; // reset user action since we followed detected lang
+//     }
+//   }
+// }, [languageTranslate, currentContactId]);
+const detectedLangRef = useRef(null); // Track last detected lang
+const userChangedRef = useRef(false); // Track if user made a change
+
+// When detected language or current contact changes
 useEffect(() => {
   const detectedLanguage = languageTranslate.find(
     (lang) => lang.contactId === currentContactId[0]
@@ -199,17 +230,24 @@ useEffect(() => {
   if (detectedLanguage) {
     const newLang = detectedLanguage.lang;
 
-    // If user has not selected manually or if detected language changed
-    if (
-      (!userActionRef.current && selectedLanguage !== newLang) ||
-      lastDetectedLangRef.current !== newLang
-    ) {
-      setSelectedLanguage(newLang);
-      lastDetectedLangRef.current = newLang;
-      userActionRef.current = false; // reset user action since we followed detected lang
+    // If detected language has changed
+    if (detectedLangRef.current !== newLang) {
+      detectedLangRef.current = newLang;
+
+      // If user has not manually changed OR wants to follow detected
+      if (!userChangedRef.current) {
+        setSelectedLanguage(newLang);
+      }
     }
   }
 }, [languageTranslate, currentContactId]);
+
+// When user changes the dropdown manually
+
+useEffect(() => {
+  userChangedRef.current = false;
+}, [currentContactId]);
+
 
     return (
         <div className="chatroom">
