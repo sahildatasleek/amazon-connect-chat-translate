@@ -40,10 +40,14 @@ const Chatroom = (props) => {
         const { AbsoluteTime, Id } = awsSdkResponse.data;
         console.log(AbsoluteTime, Id);
     }
-    const handleChange = (event) => {
-        setSelectedLanguage(event.target.value); // Update the state
-        userActionRef.current = true; // Mark this as a user action
-      };
+    // const handleChange = (event) => {
+    //     setSelectedLanguage(event.target.value); // Update the state
+    //     userActionRef.current = true; // Mark this as a user action
+    //   };
+const handleChange = (event) => {
+  setSelectedLanguage(event.target.value);
+  userActionRef.current = true;
+};
 
     useEffect(() => {
 
@@ -154,23 +158,34 @@ const Chatroom = (props) => {
       for (const element of dropdowndata) {
         valueData.push(element.category);
       }
-      useEffect(() => {
-        const detectedLanguage = languageTranslate.find(
-          (lang) => lang.contactId === currentContactId[0]
-        );
+      // useEffect(() => {
+      //   const detectedLanguage = languageTranslate.find(
+      //     (lang) => lang.contactId === currentContactId[0]
+      //   );
       
-        if (detectedLanguage && !userActionRef.current) {
-          setSelectedLanguage(detectedLanguage.lang); // Update dropdown
-        }
+      //   if (detectedLanguage && !userActionRef.current) {
+      //     setSelectedLanguage(detectedLanguage.lang); // Update dropdown
+      //   }
       
-        // Reset userActionRef after a short delay
-        const timer = setTimeout(() => {
-          userActionRef.current = false;
-        }, 3000); // Adjust delay as needed
+      //   // Reset userActionRef after a short delay
+      //   const timer = setTimeout(() => {
+      //     userActionRef.current = false;
+      //   }, 3000); // Adjust delay as needed
       
-        return () => clearTimeout(timer); // Clean up the timer
-      }, [languageTranslate, currentContactId]);
+      //   return () => clearTimeout(timer); // Clean up the timer
+      // }, [languageTranslate, currentContactId]);
 
+useEffect(() => {
+  const detectedLanguage = languageTranslate.find(
+    (lang) => lang.contactId === currentContactId[0]
+  );
+
+  if (detectedLanguage) {
+    if (!userActionRef.current) {
+      setSelectedLanguage(detectedLanguage.lang);
+    }
+  }
+}, [languageTranslate, currentContactId]);
 
     return (
         <div className="chatroom">
