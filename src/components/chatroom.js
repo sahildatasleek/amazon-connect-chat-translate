@@ -10,51 +10,47 @@ const Chatroom = (props) => {
   const [newMessage, setNewMessage] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [languageTranslate] = useGlobalState("languageTranslate");
-  const [languageOptions] = useGlobalState("languageOptions");
   const [dropdowndata, setDropdowndata] = useState([]);
   const [loading, setLoading] = useState(false);
   const agentUsername = "AGENT";
   const messageEl = useRef(null);
-  const input = useRef(null);
   
   // Language state management
   const [selectedLanguage, setSelectedLanguage] = useState("en");
-  const [isManualSelection, setIsManualSelection] = useState(false);
+  const lastManualLanguage = useRef(null);
   const prevContactIdRef = useRef(currentContactId[0]);
 
   // Language selection handler
   const handleLanguageChange = (event) => {
     const lang = event.target.value;
     setSelectedLanguage(lang);
-    setIsManualSelection(true);
+    lastManualLanguage.current = lang;
   };
 
   // Effect to handle language detection
   useEffect(() => {
+    const detectedLanguage = languageTranslate.find(
+      lang => lang.contactId === currentContactId[0]
+    );
+
     // Only auto-update if:
-    // 1. It's a different contact, or
+    // 1. It's a different contact, OR
     // 2. It's the same contact but no manual selection was made
-    if (currentContactId[0] !== prevContactIdRef.current || !isManualSelection) {
-      const detectedLanguage = languageTranslate.find(
-        lang => lang.contactId === currentContactId[0]
-      );
-      
+    if (currentContactId[0] !== prevContactIdRef.current || !lastManualLanguage.current) {
       if (detectedLanguage) {
         setSelectedLanguage(detectedLanguage.lang);
-        setIsManualSelection(false);
       }
     }
 
-    // Update previous contact ID reference
-    prevContactIdRef.current = currentContactId[0];
-    
-    // Reset manual selection flag when contact changes
+    // Reset manual selection when contact changes
     if (currentContactId[0] !== prevContactIdRef.current) {
-      setIsManualSelection(false);
+      lastManualLanguage.current = null;
     }
-  }, [currentContactId, languageTranslate, isManualSelection]);
 
-  // Auto-scroll and focus effects
+    prevContactIdRef.current = currentContactId[0];
+  }, [currentContactId, languageTranslate]);
+
+  // Auto-scroll effect
   useEffect(() => {
     if (messageEl.current) {
       messageEl.current.addEventListener('DOMNodeInserted', event => {
@@ -68,18 +64,12 @@ const Chatroom = (props) => {
     setLoading(true);
     event.preventDefault();
     
-    if (newMessage === "") {
-      return;
-    }
+    if (!newMessage.trim()) return;
 
     try {
-      // Translate the message
       const translatedMessageAPI = await translateTextAPI(newMessage, 'en', selectedLanguage);
       const translatedMessage = translatedMessageAPI.TranslatedText;
 
-      console.log(`Original: ${newMessage}\nTranslated: ${translatedMessage}`);
-      
-      // Create the new message
       const newChat = {
         contactId: currentContactId[0],
         username: agentUsername,
@@ -87,11 +77,9 @@ const Chatroom = (props) => {
         translatedMessage: <p>{translatedMessage}</p>,
       };
 
-      // Add to store and clear input
       addChat(prevMsg => [...prevMsg, newChat]);
       setNewMessage("");
 
-      // Send message via session
       const session = retrieveValue(currentContactId[0]);
       if (session) {
         await sendMessage(session, translatedMessage);
@@ -126,40 +114,29 @@ const Chatroom = (props) => {
     return null;
   };
 
-  const handleChange2 = (e) => {
-    setTimeout(() => {
-      setSelectedValue(e.target.value);
-      const urlq = `https://betqoq75b6.execute-api.us-east-1.amazonaws.com/production/softphoneqna?category=${e.target.value}`;
-      const headers = new Headers();
-      headers.append("x-api-key", "AzP1YtY7VF24pdQPqgbhNaeMi2vbrzWk9H25mS9C");
-      
-      fetch(new Request(urlq, {
-        method: "GET",
-        headers: headers,
-      }))
-        .then((response) => response.json())
-        .then((json) => setNewMessage(json.items.reply))
-        .catch((error) => console.error(error));
-    }, 2000);
+  const handleCategorySelect = (e) => {
+    setSelectedValue(e.target.value);
+    const url = `https://betqoq75b6.execute-api.us-east-1.amazonaws.com/production/softphoneqna?category=${e.target.value}`;
+    
+    fetch(url, {
+      headers: { 'x-api-key': "AzP1YtY7VF24pdQPqgbhNaeMi2vbrzWk9H25mS9C" }
+    })
+      .then(res => res.json())
+      .then(data => setNewMessage(data.items?.reply || ""))
+      .catch(console.error);
   };
 
-  // Fetch dropdown data
+  // Fetch dropdown categories
   useEffect(() => {
-    const apiKey = "AzP1YtY7VF24pdQPqgbhNaeMi2vbrzWk9H25mS9C";
-    const headers = new Headers();
-    headers.append("x-api-key", apiKey);
-    const url = "https://betqoq75b6.execute-api.us-east-1.amazonaws.com/production/qna";
-    
-    fetch(new Request(url, {
-      method: "GET",
-      headers: headers,
-    }))
-      .then((response) => response.json())
-      .then((json) => setDropdowndata(json.msg.Items))
-      .catch((error) => console.error(error));
+    fetch("https://betqoq75b6.execute-api.us-east-1.amazonaws.com/production/qna", {
+      headers: { 'x-api-key': "AzP1YtY7VF24pdQPqgbhNaeMi2vbrzWk9H25mS9C" }
+    })
+      .then(res => res.json())
+      .then(data => setDropdowndata(data.msg?.Items || []))
+      .catch(console.error);
   }, []);
 
-  const valueData = dropdowndata.map(element => element.category).sort();
+  const categories = dropdowndata.map(item => item.category).sort();
 
   return (
     <div className="chatroom">
@@ -168,6 +145,7 @@ const Chatroom = (props) => {
           id="language-select" 
           value={selectedLanguage} 
           onChange={handleLanguageChange}
+          aria-label="Select translation language"
         >
           <option value="fr">French</option>
           <option value="ja">Japanese</option>
@@ -178,17 +156,19 @@ const Chatroom = (props) => {
           <option value="de">German</option>
           <option value="th">Thai</option>
         </select>
-        Translation - {selectedLanguage || "Not Selected"}
+        <span>Translation - {selectedLanguage || "Not Selected"}</span>
       </h3>
       
       <ul className="chats" ref={messageEl}>
-        {Chats.map((chat) => (
-          chat.contactId === currentContactId[0] && (
-            <Message key={`${chat.contactId}-${chat.username}-${Date.now()}`} 
-                    chat={chat} 
-                    user={agentUsername} />
-          )
-        ))}
+        {Chats.filter(chat => chat.contactId === currentContactId[0])
+          .map((chat, index) => (
+            <Message 
+              key={`${chat.contactId}-${index}-${Date.now()}`}
+              chat={chat} 
+              user={agentUsername} 
+            />
+          ))
+        }
       </ul>
       
       <form className="input" onSubmit={handleSubmit}>
@@ -198,26 +178,31 @@ const Chatroom = (props) => {
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message here..."
+          aria-label="Message input"
         />
         
-        <datalist id="suggestions">
-          {valueData.map((option) => (
-            <option key={option} value={option} />
-          ))}
-        </datalist>
+        <div className="suggestion-container">
+          <input
+            list="suggestions"
+            value={selectedValue}
+            onChange={handleCategorySelect}
+            placeholder="Select category"
+            aria-label="Select message category"
+          />
+          <datalist id="suggestions">
+            {categories.map(category => (
+              <option key={category} value={category} />
+            ))}
+          </datalist>
+        </div>
         
-        <input
-          autoComplete="on"
-          list="suggestions"
-          placeholder="Select category"
-          onChange={handleChange2}
-        />
-        
-        <input 
+        <button 
           type="submit" 
-          value={loading ? "Sending..." : "Send"} 
-          disabled={loading}
-        />
+          disabled={loading || !newMessage.trim()}
+          aria-busy={loading}
+        >
+          {loading ? "Sending..." : "Send"}
+        </button>
       </form>
     </div>
   );
