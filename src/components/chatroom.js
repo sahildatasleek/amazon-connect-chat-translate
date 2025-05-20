@@ -30,28 +30,33 @@ const Chatroom = (props) => {
 
     if (detectedLanguage) {
       const newLang = detectedLanguage.lang;
-      
-      // Update last detected language reference
       lastDetectedLang.current = newLang;
       
-      // Only auto-update dropdown if user hasn't manually changed it
       if (!userOverride) {
         setSelectedLanguage(newLang);
       }
     }
   }, [languageTranslate, currentContactId]);
 
+ const handleLanguageChange = (event) => {
+    const lang = event.target.value;
+    if (lang) {  // Ensure a valid selection
+      setSelectedLanguage(lang);
+      setUserOverride(true);
+    }
+  };
+
   // Reset user override when contact changes
   useEffect(() => {
     setUserOverride(false);
+    // Reset to detected language when contact changes
+    const detectedLanguage = languageTranslate.find(
+      lang => lang.contactId === currentContactId[0]
+    );
+    if (detectedLanguage) {
+      setSelectedLanguage(detectedLanguage.lang);
+    }
   }, [currentContactId]);
-
-  // Handle manual language selection
-  const handleChange = (event) => {
-    const lang = event.target.value;
-    setSelectedLanguage(lang);
-    setUserOverride(true);
-  };
 
   const sendMessage = async(session, content) => {
     const awsSdkResponse = await session.sendMessage({
@@ -161,13 +166,14 @@ const Chatroom = (props) => {
 
   return (
     <div className="chatroom">
-      <h3>
+     <h3>
         <select 
           id="language-select" 
           value={selectedLanguage} 
-          onChange={handleChange}
+          onChange={handleLanguageChange}
           aria-label="Select translation language"
         >
+          <option value="">Select a language</option>
           <option value="fr">French</option>
           <option value="ja">Japanese</option>
           <option value="es">Spanish</option>
@@ -177,10 +183,8 @@ const Chatroom = (props) => {
           <option value="de">German</option>
           <option value="th">Thai</option>
         </select>
-        Translation - {selectedLanguage || "Not Selected"}
-        {userOverride && (
-          <span className="override-notice"> (Manual Selection)</span>
-        )}
+        {selectedLanguage ? `Translation - ${selectedLanguage}` : "No language selected"}
+        {userOverride && " (Manual)"}
       </h3>
       
       <ul className="chats" ref={messageEl}>
