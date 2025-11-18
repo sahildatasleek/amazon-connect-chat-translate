@@ -5,10 +5,12 @@ function Deposition() {
   const [isActive, setIsActive] = useState(true);
   const Depositionurl =
     "https://t86a6l5lk4.execute-api.us-east-1.amazonaws.com/production";
+    const myValue = localStorage.getItem("myKey");
   const DepositionHandleChnage = async (e) => {
     setLoading(true);
+    console.log(myValue,"myvalue")
     console.log(e.target.value);
-    const myValue = localStorage.getItem("myKey");
+  
     if (myValue) {
       //post method
       const data = {
