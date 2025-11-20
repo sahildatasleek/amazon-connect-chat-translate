@@ -1,250 +1,165 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import "./chatroom.css";
+
+// 1. Define the disposition codes data structure once outside the component
+const DISPOSITION_CODES = [
+  "Air – Change Flights",
+  "Air – Schedule Change",
+  "Air – Cancel Flights",
+  "Air – Chg/Cxl w/in 24 hrs of Booking",
+  "Air – Seats, Baggage, or Other",
+  "Cancel – Refund Option Available",
+  "Cancel – In Penalty or Non-Refundable",
+  "Change – Dates, People, or Product",
+  "Pre-Booking – Shopping or Error",
+  "General Question ", // Note: Trailing space kept for consistency with original code
+  "Outbound Air – Exchange",
+  "Outbound Air – Airline Policy or Exception",
+  "Outbound Air – Schedule Change",
+  "Outbound Fee Waiver Request",
+  "Outbound Follow-Up with Customer",
+  "Outbound Confirmation Number",
+  "Outbound Hotel Check-In Issue or Request",
+  "Outbound Car Pick-Up Issue",
+  "Outbound Activity Ticket or Supplier Issue",
+  "Outbound Flight or Airline Issue",
+];
+
 function Deposition() {
   const [loading, setLoading] = useState(false);
   const [isActive, setIsActive] = useState(true);
-  const Depositionurl =
-    "https://t86a6l5lk4.execute-api.us-east-1.amazonaws.com/production";
-    const myValue = localStorage.getItem("myKey");
-  const DepositionHandleChnage = async (e) => {
-    setLoading(true);
-    console.log(myValue,"myvalue")
-    console.log(e.target.value);
+
+  // Use useMemo for constant URLs
+  const Depositionurl = useMemo(() =>
+    "https://t86a6l5lk4.execute-api.us-east-1.amazonaws.com/production", []);
   
-    if (myValue) {
-      //post method
-      const data = {
-        disposition_code: e.target.value,
-        contact_id: myValue,
-      };
-      // console.log(data);
-      const response = await fetch(Depositionurl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await response.json();
-      setLoading(false);
-      console.log(json);
-      if (json.statusCode === 200) {
-        alert("Contact attributes updated successfully");
-      } else {
-        alert("Contact attributes updated failed");
-      }
-    } else {
-      alert("something went wrong");
-      setLoading(false);
-    }
-    console.log(myValue);
-  };
-  //   const sahil = "232332222";
-  //   localStorage.setItem("myKey", sahil);
+  const resumeUrl = useMemo(() =>
+    "https://928d9w8i2k.execute-api.us-east-1.amazonaws.com/production/resumerecording", []);
 
-  const resume =
-    "https://928d9w8i2k.execute-api.us-east-1.amazonaws.com/production/resumerecording";
-  const pauseapi =
-    "https://928d9w8i2k.execute-api.us-east-1.amazonaws.com/production/suspendrecording";
+  const pauseUrl = useMemo(() =>
+    "https://928d9w8i2k.execute-api.us-east-1.amazonaws.com/production/suspendrecording", []);
 
-  const startbuttonfnc = async (e) => {
-    console.log("start button clicked");
-    e.preventDefault();
-    //post request
-    const myValue = localStorage.getItem("myKey");
-    if (myValue) {
-      //post method
-
-      const response = await fetch(resume, {
-        method: "POST",
-
-        body: JSON.stringify({
-          contactid: myValue,
-        }),
-      });
-      const data = await response.json();
-      if (data.body === "True") {
-        alert("Recording resume");
-        setIsActive(true);
-      } else {
-        alert("Recording not resume");
-        setIsActive(false);
-      }
-      console.log(data);
-    }
-  };
-  const pausebuttonfnc = async (e) => {
+  // Use useCallback to memoize the disposition change function
+  const handleDepositionChange = useCallback(async (dispositionCode) => {
+    setLoading(true);
     
-    console.log("pause button clicked");
-    e.preventDefault();
-    //post request
-    const myValue = localStorage.getItem("myKey");
-    if (myValue) {
-      //post method
+    // Using a try-catch block for robust error handling
+    try {
+        const myValue = localStorage.getItem("myKey");
+        if (!myValue) {
+            console.error("Error: contact_id (myKey) not found in localStorage.");
+            alert("Something went wrong: Contact ID not found.");
+            return;
+        }
 
-      const response = await fetch(pauseapi, {
-        method: "POST",
+        const data = {
+            disposition_code: dispositionCode,
+            contact_id: myValue,
+        };
 
-        body: JSON.stringify({
-          contactid: myValue,
-        }),
-      });
-      const data = await response.json();
-      if (data.body === "True") {
-        setIsActive(false);
+        const response = await fetch(Depositionurl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
 
-        alert("Recording paused");
-      } else {
-        alert("Recording not paused");
-        setIsActive(true);
-      }
+        const json = await response.json();
+        console.log("Deposition API Response:", json);
 
-      console.log(data);
+        if (json.statusCode === 200) {
+            alert("Contact attributes updated successfully");
+        } else {
+            // Log failure reason if available
+            console.error("Deposition update failed:", json.message || "Unknown error");
+            alert("Contact attributes updated failed");
+        }
+    } catch (error) {
+        console.error("Network or parsing error during deposition update:", error);
+        alert("An error occurred during the update process.");
+    } finally {
+        setLoading(false);
     }
-  };
+  }, [Depositionurl]); // Dependency array includes Depositionurl
+
+  // 3. Consolidate Recording Controls into a single function using useCallback
+  const handleRecording = useCallback(async (action) => {
+    const isResume = action === "resume";
+    const endpoint = isResume ? resumeUrl : pauseUrl;
+    const actionName = isResume ? "resume" : "pause";
+    
+    try {
+        const myValue = localStorage.getItem("myKey");
+        if (!myValue) {
+            alert("Something went wrong: Contact ID not found for recording control.");
+            return;
+        }
+
+        const response = await fetch(endpoint, {
+            method: "POST",
+            // Note: If contactid is consistently a string, using contactid: myValue is fine.
+            // If the API expects a number, you might need: contactid: Number(myValue)
+            body: JSON.stringify({ contactid: myValue }), 
+        });
+        
+        // Check if response is ok before attempting to parse JSON
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const success = data.body === "True";
+
+        if (success) {
+            setIsActive(isResume);
+            alert(`Recording ${actionName}d successfully`);
+        } else {
+            alert(`Recording not ${actionName}d (API returned failure)`);
+        }
+        console.log("Recording control response:", data);
+        
+    } catch (error) {
+        console.error(`Error during ${actionName} operation:`, error);
+        alert(`An error occurred while trying to ${actionName} the recording.`);
+    }
+  }, [resumeUrl, pauseUrl]); // Dependency array includes URLs
+
   return (
     <div className="DepositionContainer">
       <div style={{ height: "70%" }}>
         <div className="Depositionheader">
           <p>Disposition</p>
         </div>
+        
         {loading ? (
           <div className="DepositionCode">Loading...</div>
         ) : (
+          // 2. Centralized Button Rendering
           <div className="DepositionCode">
-            <button
-               value="Air – Change Flights"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Air – Change Flights
-             </button>
-             <button
-               value="Air – Schedule Change"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Air – Schedule Change
-             </button>
-             <button
-               value="Air – Cancel Flights"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Air – Cancel Flights
-             </button>
-             <button
-               value="Air – Chg/Cxl w/in 24 hrs of Booking"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Air – Chg/Cxl w/in 24 hrs of Booking
-             </button>
-             <button
-               value="Air – Seats, Baggage, or Other"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Air – Seats, Baggage, or Other
-             </button>
-             <button
-               value="Cancel – Refund Option Available"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Cancel – Refund Option Available
-             </button>
-             <button
-               value="Cancel – In Penalty or Non-Refundable"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Cancel – In Penalty or Non-Refundable
-             </button>
-             <button
-               value="Change – Dates, People, or Product"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Change – Dates, People, or Product
-             </button>
-             <button
-               value="Pre-Booking – Shopping or Error"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               Pre-Booking – Shopping or Error
-             </button>
-             <button
-               value="General Question "
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-               General Question 
-             </button>
-             <button
-               value="Outbound Air – Exchange"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-              Outbound Air – Exchange
-             </button>
-             <button
-               value=" Outbound Air – Airline Policy or Exception"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound  Air – Airline Policy or Exception
-             </button>
-             <button
-               value="Outbound Air – Schedule Change"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound Air – Schedule Change
-             </button>
-             <button
-               value="Outbound Fee Waiver Request"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-           Outbound  Fee Waiver Request
-             </button>
-             <button
-               value=" Outbound Follow-Up with Customer"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound  Follow-Up with Customer
-             </button>
-             <button
-               value="Outbound Confirmation Number"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound  Confirmation Number
-             </button>
-             <button
-               value=" Outbound Hotel Check-In Issue or Request"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-           Outbound  Hotel Check-In Issue or Request
-             </button>
-             <button
-               value="Outbound Car Pick-Up Issue"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound Car Pick-Up Issue
-             </button>
-             <button
-               value="Outbound Activity Ticket or Supplier Issue"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-              Outbound Activity Ticket or Supplier Issue
-             </button>
-             <button
-               value="Outbound Flight or Airline Issue"
-               onClick={(e) => DepositionHandleChnage(e)}
-             >
-            Outbound Flight or Airline Issue
-             </button>
-           
+            {DISPOSITION_CODES.map((code) => (
+              <button
+                key={code} // Critical for production code: Unique key for list items
+                onClick={() => handleDepositionChange(code)} // Pass value directly
+              >
+                {code}
+              </button>
+            ))}
           </div>
         )}
       </div>
+
+
       <div style={{ height: "30%" }}>
         <div className={isActive ? "Recordingcontrol" : "inactive"}>
           <p>{isActive ? "Recording" : "Recording Stopped"}</p>
         </div>
         <div className="controlsbutton">
-          <button className="pauseButton" onClick={pausebuttonfnc}>
+          {/* Use the consolidated handler */}
+          <button className="pauseButton" onClick={() => handleRecording("pause")}>
             Pause
           </button>
-          <button className="startButton" onClick={startbuttonfnc}>
+          <button className="startButton" onClick={() => handleRecording("resume")}>
             Resume
           </button>
         </div>
