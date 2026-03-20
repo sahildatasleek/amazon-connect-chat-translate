@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Grid } from 'semantic-ui-react';
 import  { Amplify }  from 'aws-amplify';
 import awsconfig from '../aws-exports';
@@ -187,11 +187,19 @@ const Ccp = () => {
     };
 
 
-    // ***** 
+    const ccpInitialized = useRef(false);
+
+    // *****
     // Loading CCP
     // *****
     useEffect(() => {
         const connectUrl = process.env.REACT_APP_CONNECT_INSTANCE_URL;
+        if (!connectUrl) {
+            console.error("REACT_APP_CONNECT_INSTANCE_URL is not set in .env");
+            return;
+        }
+        if (ccpInitialized.current) return;
+        ccpInitialized.current = true;
         window.connect.core.initCCP(
             document.getElementById("ccp-container"),
             {
