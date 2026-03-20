@@ -1,31 +1,15 @@
-import { post } from '@aws-amplify/api';
-//async function ProcessChatTextAPI(content, sourceLang, targetLang, terminologyNames)
+const TRANSLATE_API_URL = 'https://id40hl57lf.execute-api.us-east-1.amazonaws.com/main/translate';
+
 async function ProcessChatTextAPI(content, sourceLang, targetLang) {
-    const apiName = 'amazonTranslateAPI';
-    const path = '/translate';
-    const myInit = { // OPTIONAL
-        body: { 'content': content, 'sourceLang': sourceLang, 'targetLang': targetLang },
-        //body: { 'content': content, 'sourceLang': sourceLang, 'targetLang': targetLang, 'terminologyNames': terminologyNames },
-        headers: {
-        }, // OPTIONAL
-    };
-    console.log("ProcessChatTextAPI: ", content);
-    console.log("ProcessChatTextAPI: ", sourceLang);
-    console.log("ProcessChatTextAPI: ", targetLang);
-    //console.log("ProcessChatTextAPI: ", terminologyNames);
-    console.log("ProcessChatTextAPI: ", path);
-    console.log("ProcessChatTextAPI: ", myInit);
-    console.log("API Name: ", apiName);
     try {
-        const result = await post({
-            apiName,
-            path,
-            options: myInit,
-        }).response
-        console.log("Translated Message Payload: ", result);
-        const res = result.body
-        console.log("Translated Message: ", res);
-        const resp = await res.json();
+        const response = await fetch(TRANSLATE_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content, sourceLang, targetLang }),
+        });
+        const resp = await response.json();
         console.log("Response: ", resp);
         return resp;
     }
