@@ -5,6 +5,7 @@ const { setGlobalState, useGlobalState } = createGlobalState({
     languageTranslate: [],
     Chats: [],
     currentContactId: 'none',
+    agentTargetLanguage: 'en',
     languageOptions: {
         'Afrikaans':'af',
         'Albanian':'sq',
@@ -97,6 +98,10 @@ export const setLanguageTranslate = (state) => {
 
 export const setCurrentContactId = (contactId) => {
     setGlobalState("currentContactId", contactId);
+};
+
+export const setAgentTargetLanguage = (lang) => {
+    setGlobalState("agentTargetLanguage", lang);
 };
 
 export { useGlobalState };

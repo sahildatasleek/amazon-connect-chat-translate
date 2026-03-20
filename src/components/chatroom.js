@@ -3,7 +3,7 @@ import './chatroom.css';
 import Message from './message.js';
 //import translateText from './translate'
 import translateTextAPI from './translateAPI'
-import { addChat, useGlobalState } from '../store/state';
+import { addChat, useGlobalState, setAgentTargetLanguage } from '../store/state';
 
 const Chatroom = (props) => {
 
@@ -123,6 +123,10 @@ const Chatroom = (props) => {
             return value;
         }
         setLoading(false);
+        if (!session || typeof session.sendMessage !== 'function') {
+            console.error("No active chat session found for contactId:", currentContactId[0]);
+            return;
+        }
         sendMessage(session, translatedMessage);
     }
     const handleChange2 = (e) => {
@@ -245,7 +249,8 @@ useEffect(() => {
 const handleChange = (event) => {
   const lang = event.target.value;
   setSelectedLanguage(lang);
-  userChangedRef.current = true; // Mark manual control
+  setAgentTargetLanguage(lang);
+  userChangedRef.current = true;
 };
 
 useEffect(() => {

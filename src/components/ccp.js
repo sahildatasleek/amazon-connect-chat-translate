@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Grid } from 'semantic-ui-react';
-import  { Amplify }  from 'aws-amplify';
-import awsconfig from '../aws-exports';
 import Chatroom from './chatroom';
 import translateText from './translate'
 import detectText from './detectText'
 import { addChat, setLanguageTranslate, clearChat, useGlobalState, setCurrentContactId } from '../store/state';
 import Deposition from './Deposition';
-Amplify.configure(awsconfig);
 //
 const Ccp = () => {
     const [languageTranslate] = useGlobalState('languageTranslate');
@@ -16,6 +13,7 @@ const Ccp = () => {
     const [lang, setLang] = useState("");
     const [currentContactId] = useGlobalState('currentContactId');
     const [languageOptions] = useGlobalState('languageOptions');
+    const [agentTargetLanguage] = useGlobalState('agentTargetLanguage');
     const [agentChatSessionState, setAgentChatSessionState] = useState([]);
     const [setRefreshChild] = useState([]);
 
@@ -71,7 +69,7 @@ const Ccp = () => {
         setLanguageTranslate(languageTranslate);
                 
         // Translate the customer message into English.
-        let translatedMessage = await translateText(content, textLang, 'en');
+        let translatedMessage = await translateText(content, textLang, agentTargetLanguage || 'en');
         console.log(`CDEBUG ===>  Original Message: ` + content + `\n Translated Message: ` + translatedMessage);
         // create the new message to add to Chats.
         let data2 = {
