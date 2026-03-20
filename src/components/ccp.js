@@ -192,20 +192,25 @@ const Ccp = () => {
     // *****
     useEffect(() => {
         const connectUrl = process.env.REACT_APP_CONNECT_INSTANCE_URL;
-        window.connect.agentApp.initApp(
-            "ccp",
-            "ccp-container",
-            connectUrl + "/connect/ccp-v2/", { 
-                ccpParams: { 
-                    region: process.env.REACT_APP_CONNECT_REGION,
-                    pageOptions: {                  // optional
-                        enableAudioDeviceSettings: true, // optional, defaults to 'false'
-                        enablePhoneTypeSettings: true // optional, defaults to 'true'
-                      }
-                } 
+        window.connect.core.initCCP(
+            document.getElementById("ccp-container"),
+            {
+                ccpUrl: connectUrl + "/connect/ccp-v2/",
+                region: process.env.REACT_APP_CONNECT_REGION,
+                loginPopup: true,
+                loginPopupAutoClose: true,
+                softphone: {
+                    allowFramedSoftphone: true
+                },
+                pageOptions: {
+                    enableAudioDeviceSettings: true,
+                    enablePhoneTypeSettings: true
+                }
             }
         );
-        subscribeConnectEvents();
+        window.connect.core.onInitialized(() => {
+            subscribeConnectEvents();
+        });
     }, []);
 
 
