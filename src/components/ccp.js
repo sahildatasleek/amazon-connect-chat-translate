@@ -14,6 +14,10 @@ const Ccp = () => {
     const [currentContactId] = useGlobalState('currentContactId');
     const [languageOptions] = useGlobalState('languageOptions');
     const [agentTargetLanguage] = useGlobalState('agentTargetLanguage');
+    const agentTargetLanguageRef = useRef('en');
+    useEffect(() => {
+        agentTargetLanguageRef.current = agentTargetLanguage || 'en';
+    }, [agentTargetLanguage]);
     const [agentChatSessionState, setAgentChatSessionState] = useState([]);
     const [setRefreshChild] = useState([]);
 
@@ -55,7 +59,8 @@ const Ccp = () => {
         // If the contatId was not found in the store, or the store is empty, perform dectText API to comprehend
         if (localLanguageTranslate.length === 0 || textLang === ''){
             let tempLang = await detectText(content);
-            textLang = tempLang.textInterpretation.language
+            textLang = tempLang.textInterpretation.language;
+            console.log("CDEBUG ===> Detected language:", textLang);
         }
 
 
@@ -69,7 +74,8 @@ const Ccp = () => {
         setLanguageTranslate(languageTranslate);
                 
         // Translate the customer message into English.
-        let translatedMessage = await translateText(content, textLang, agentTargetLanguage || 'en');
+        console.log("CDEBUG ===> Translating from:", textLang, "to:", agentTargetLanguageRef.current);
+        let translatedMessage = await translateText(content, textLang, agentTargetLanguageRef.current);
         console.log(`CDEBUG ===>  Original Message: ` + content + `\n Translated Message: ` + translatedMessage);
         // create the new message to add to Chats.
         let data2 = {
