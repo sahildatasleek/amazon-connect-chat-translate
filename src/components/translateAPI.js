@@ -10,8 +10,10 @@ async function ProcessChatTextAPI(content, sourceLang, targetLang) {
             body: JSON.stringify({ content, sourceLang, targetLang }),
         });
         const resp = await response.json();
-        console.log("Response: ", resp);
-        return resp;
+        console.log("CDEBUG ===> raw translateAPI response:", resp);
+        // Lambda wraps its response in a 'body' string — parse it
+        const parsed = resp.body ? JSON.parse(resp.body) : resp;
+        return parsed;
     }
     catch (error) {
         console.error("ProcessChatTextAPI: ", error);

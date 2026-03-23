@@ -8,6 +8,8 @@ import Deposition from './Deposition';
 //
 const Ccp = () => {
     const [languageTranslate] = useGlobalState('languageTranslate');
+    const languageTranslateRef = useRef([]);
+    useEffect(() => { languageTranslateRef.current = languageTranslate; }, [languageTranslate]);
     var localLanguageTranslate = [];
     const [Chats] = useGlobalState('Chats');
     const [lang, setLang] = useState("");
@@ -47,45 +49,38 @@ const Ccp = () => {
     // Processing the incoming chat from the Customer
     // *******
     async function processChatText(content, type, contactId) {
-        // Check if we know the language for this contactId, if not use dectectText(). This process means we only perform comprehend language detection at most once.
         console.log(type);
-        let textLang = '';
-          for(var i = 0; i < languageTranslate.length; i++) {
-                if (languageTranslate[i].contactId === contactId) {
-                    textLang = languageTranslate[i].lang
-                     break
-                } 
-        }
-        // If the contatId was not found in the store, or the store is empty, perform dectText API to comprehend
-        if (localLanguageTranslate.length === 0 || textLang === ''){
-            let tempLang = await detectText(content);
-            textLang = tempLang.textInterpretation.language;
-            console.log("CDEBUG ===> Detected language:", textLang);
-        }
+        // Translate to English using 'auto' — Amazon Translate detects source language accurately.
+        // Response includes { TranslatedText, SourceLanguageCode }
+        // Detect language client-side (Lambda role lacks comprehend:DetectDominantLanguage)
+        const detected = await detectText(content);
+        const detectedLang = detected.textInterpretation.language;
+        console.log("CDEBUG ===> Detected lang:", detectedLang);
 
+        // If already English, no need to translate
+        let translatedMessage = content;
+        if (detectedLang !== 'en') {
+            const result = await translateText(content, detectedLang, 'en');
+            console.log("CDEBUG ===> FULL RESULT:", JSON.stringify(result));
+            translatedMessage = result.TranslatedText || content;
+        }
+        console.log("CDEBUG ===> Translated:", translatedMessage);
 
-         // Update (or Add if new contactId) the store with the the language code
-         function upsert(array, item) { // (1)
-            const i = array.findIndex(_item => _item.contactId === item.contactId);
-            if (i > -1) array[i] = item; // (2)
-            else array.push(item);
-          }
-        upsert(languageTranslate, {contactId: contactId, lang: textLang})
-        setLanguageTranslate(languageTranslate);
-                
-        // Translate the customer message into English.
-        console.log("CDEBUG ===> Translating from:", textLang, "to:", agentTargetLanguageRef.current);
-        let translatedMessage = await translateText(content, textLang, agentTargetLanguageRef.current);
-        console.log(`CDEBUG ===>  Original Message: ` + content + `\n Translated Message: ` + translatedMessage);
-        // create the new message to add to Chats.
-        let data2 = {
-            contactId: contactId,
+        // Update languageTranslate store so the dropdown in Chatroom auto-updates
+        const currentLangTranslate = languageTranslateRef.current;
+        const updated = [...currentLangTranslate];
+        const idx = updated.findIndex(item => item.contactId === contactId);
+        if (idx > -1) updated[idx] = { contactId, lang: detectedLang };
+        else updated.push({ contactId, lang: detectedLang });
+        setLanguageTranslate(updated);
+
+        // Add message to chat
+        addChat(prevMsg => [...prevMsg, {
+            contactId,
             username: 'customer',
             content: <p>{content}</p>,
             translatedMessage: <p>{translatedMessage}</p>
-        };
-        // Add the new message to the store
-        addChat(prevMsg => [...prevMsg, data2]);
+        }]);
     }
 
     // *******
@@ -126,13 +121,13 @@ const Ccp = () => {
                     setAgentChatSessionState(agentChatSessionState => [...agentChatSessionState, {[contact.contactId] : agentChatSession}])
                 
                     // Get the language from the attributes, if the value is valid then add to the store
-                    localLanguageTranslate = contact.getAttributes().x_lang.value
-                    if (Object.keys(languageOptions).find(key => languageOptions[key] === localLanguageTranslate) !== undefined){
+                    const x_lang = contact.getAttributes().x_lang;
+                    localLanguageTranslate = x_lang ? x_lang.value : '';
+                    if (localLanguageTranslate && Object.keys(languageOptions).find(key => languageOptions[key] === localLanguageTranslate) !== undefined){
                         console.log("CDEBUG ===> Setting lang code from attribites:", localLanguageTranslate)
                         languageTranslate.push({contactId: contact.contactId, lang: localLanguageTranslate})
                         setLanguageTranslate(languageTranslate);
-                        setRefreshChild('updated') // Workaround to force a refresh of the chatroom UI to show the updated language based on contact attribute.
-                
+                        setRefreshChild('updated')
                     }
                     console.log("CDEBUG ===> onAccepted, languageTranslate ", languageTranslate)
                     
