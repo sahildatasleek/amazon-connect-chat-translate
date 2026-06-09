@@ -13,7 +13,11 @@ function detectByScript(text) {
 
 function detectLatinLang(text) {
     const t = text.toLowerCase();
-    const scores = { fr: 0, de: 0, es: 0, pt: 0, en: 0 };
+    const scores = { fr: 0, de: 0, es: 0, pt: 0, en: 0, pl: 0 };
+
+    // ── Polish ── unique diacritics + common words
+    if (/[łąężźśćń]/.test(t)) scores.pl += 8;                    // ł ą ę ż ź ś ć ń are Polish-specific
+    if (/\b(cześć|dzień|dobry|dziękuję|proszę|tak|nie|jestem|jest|nazywam|mówię|przepraszam|witam|jak|się|masz|bardzo|dobrze)\b/.test(t)) scores.pl += 5;
 
     // ── Portuguese ── strongest unique markers first
     if (/[ãõ]/.test(t)) scores.pt += 8;                          // ã õ almost exclusively Portuguese
