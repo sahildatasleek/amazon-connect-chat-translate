@@ -21,6 +21,12 @@ const DISPOSITION_CODES = [
   "Outbound - Activity",
   "Outbound - Customer Air",
   "Outbound - Customer Land",
+  "Hinda Outbound – Airline",
+  "Hinda Outbound – Hotel",
+  "Hinda Outbound – Car",
+  "Hinda Outbound – Activity",
+  "Hinda Outbound – Customer Air",
+  "Hinda Outbound – Customer Land",
 ];
 
 function Deposition() {
